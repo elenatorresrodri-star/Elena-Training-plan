@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Elena · Training</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #F5F4F1;
+  --surface: #FFFFFF;
+  --border: #E5E4DF;
+  --text: #111110;
+  --soft: #6B6A65;
+  --muted: #AEADA8;
+  --r: 14px;
+  --rs: 8px;
+  --nav: 62px;
+
+  --c-glute: #2D1B0E;
+  --c-glute-bg: #F0E6DC;
+  --c-leg: #1A2E0E;
+  --c-leg-bg: #DFF0DC;
+  --c-back: #0E1A2E;
+  --c-back-bg: #DCE8F0;
+  --c-shoulder: #2E0E2A;
+  --c-shoulder-bg: #F0DCF0;
+  --c-run: #1A1A1A;
+  --c-run-bg: #E8E8E8;
+  --c-long: #2E2200;
+  --c-long-bg: #F5EDD0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: var(--nav);
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* NAV */
+.nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  height: var(--nav);
+  z-index: 50;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px; border: none; background: none;
+  cursor: pointer; color: var(--muted); font-size: 10px; font-weight: 500;
+  transition: color 0.15s;
+}
+.nav-btn.active { color: var(--text); }
+.nav-btn svg { width: 22px; height: 22px; }
+
+/* TABS */
+.tab { display: none; }
+.tab.active { display: block; }
+
+/* HEADER */
+.page-header {
+  padding: 52px 20px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.page-header p { font-size: 13px; color: var(--soft); margin-top: 3px; }
+
+/* TRAIN TAB */
+.workout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px;
+}
+
+.workout-tile {
+  border-radius: var(--r);
+  padding: 18px 14px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: transform 0.1s;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.workout-tile:active { transform: scale(0.97); }
+.workout-tile .tile-icon { font-size: 26px; margin-bottom: 8px; }
+.workout-tile .tile-name { font-size: 14px; font-weight: 600; line-height: 1.2; }
+.workout-tile .tile-sub { font-size: 11px; opacity: 0.65; margin-top: 3px; }
+
+.tile-glute { background: var(--c-glute-bg); color: var(--c-glute); }
+.tile-leg { background: var(--c-leg-bg); color: var(--c-leg); }
+.tile-back { background: var(--c-back-bg); color: var(--c-back); }
+.tile-shoulder { background: var(--c-shoulder-bg); color: var(--c-shoulder); }
+.tile-run { background: var(--c-run-bg); color: var(--c-run); }
+.tile-long { background: var(--c-long-bg); color: var(--c-long); }
+
+/* WORKOUT DETAIL */
+.workout-detail { display: none; }
+.workout-detail.open { display: block; }
+.workout-grid-wrap { display: block; }
+.workout-grid-wrap.hidden { display: none; }
+
+.detail-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.back-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.detail-header h2 { font-size: 17px; font-weight: 600; }
+
+.ex-list { padding: 12px 16px; }
+
+.ex-card {
+  background: var(--surface);
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.ex-card-top {
+  padding: 14px 16px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  cursor: pointer;
+}
+
+.ex-card-top-left .ex-name { font-size: 15px; font-weight: 600; }
+.ex-card-top-left .ex-meta { font-size: 12px; color: var(--soft); margin-top: 3px; }
+.ex-card-top-left .ex-warn {
+  font-size: 11px; color: #92600A;
+  background: #FEF3C7; border-radius: 6px;
+  padding: 3px 8px; margin-top: 6px; display: inline-block;
+}
+
+.ex-check {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; margin-left: 10px; margin-top: 1px;
+}
+.ex-check.done { background: var(--text); border-color: var(--text); }
+
+.ex-log {
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: none;
+}
+.ex-log.open { display: block; }
+
+.sets-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.set-box {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: var(--bg); border-radius: var(--rs);
+  padding: 8px 10px; border: 1px solid var(--border);
+  min-width: 64px;
+}
+.set-box label { font-size: 10px; color: var(--muted); font-weight: 600; }
+.set-box input {
+  width: 52px; border: none; background: none;
+  font-size: 15px; font-weight: 600; color: var(--text);
+  text-align: center; outline: none;
+}
+
+.alt-box {
+  background: var(--bg); border-radius: var(--rs);
+  padding: 10px 12px; border-top: 1px solid var(--border);
+}
+.alt-box p { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.alt-box span { font-size: 12px; color: var(--soft); }
+
+.run-card {
+  background: var(--surface); border-radius: var(--r);
+  border: 1px solid var(--border); margin: 0 16px 10px;
+}
+.run-field {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; border-bottom: 1px solid var(--border);
+}
+.run-field:last-child { border-bottom: none; }
+.run-field label { font-size: 14px; color: var(--soft); }
+.run-field input {
+  width: 100px; text-align: right; border: none;
+  background: none; font-size: 15px; font-weight: 600;
+  color: var(--text); outline: none;
+}
+
+.notes-wrap { padding: 0 16px 12px; }
+.notes-wrap textarea {
+  width: 100%; border: 1px solid var(--border);
+  border-radius: var(--rs); padding: 10px 12px;
+  font-size: 13px; font-family: inherit; color: var(--text);
+  background: var(--bg); resize: none; outline: none; min-height: 72px;
+}
+
+.save-btn {
+  display: block; width: calc(100% - 32px);
+  margin: 4px 16px 20px; padding: 15px;
+  background: var(--text); color: white; border: none;
+  border-radius: var(--rs); font-size: 15px; font-weight: 600;
+  cursor: pointer; letter-spacing: -0.2px;
+}
+
+/* CALENDAR TAB */
+.cal-header { padding: 16px 20px 8px; }
+.cal-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.cal-nav h2 { font-size: 17px; font-weight: 600; }
+.cal-nav button {
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--rs); padding: 6px 12px;
+  font-size: 13px; cursor: pointer; color: var(--text);
+}
+
+.cal-days-header {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  padding: 0 16px; margin-bottom: 4px;
+}
+.cal-days-header span {
+  text-align: center; font-size: 11px; font-weight: 600; color: var(--muted);
+  padding: 4px 0;
+}
+
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 3px; padding: 0 16px;
+}
+
+.cal-day {
+  aspect-ratio: 1; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500; color: var(--soft);
+  position: relative; cursor: default;
+}
+.cal-day.today { border: 2px solid var(--text); color: var(--text); }
+.cal-day.has-workout {
+  font-weight: 700;
+}
+.cal-day .workout-dot {
+  position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+}
+.cal-day.empty { opacity: 0; pointer-events: none; }
+
+.cal-legend {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 14px 16px; border-top: 1px solid var(--border); margin-top: 12px;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--soft); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.recent-log { padding: 16px; }
+.recent-log h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.log-entry {
+  background: var(--surface); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 12px 14px;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+}
+.log-entry .log-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.log-entry .log-info { flex: 1; }
+.log-entry .log-name { font-size: 14px; font-weight: 600; }
+.log-entry .log-date { font-size: 12px; color: var(--soft); margin-top: 2px; }
+.log-entry .log-extra { font-size: 12px; color: var(--soft); }
+
+/* FOOD TAB */
+.food-tabs {
+  display: flex; gap: 0; overflow-x: auto;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.food-tabs::-webkit-scrollbar { display: none; }
+.food-tab-btn {
+  flex-shrink: 0; padding: 7px 14px; border-radius: 99px;
+  border: 1px solid var(--border); background: none;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  color: var(--soft); margin-right: 6px; transition: all 0.15s;
+}
+.food-tab-btn.active { background: var(--text); color: white; border-color: var(--text); }
+
+.food-list { padding: 12px 16px; }
+.food-card {
+  background: var(--surface); border-radius: var(--r);
+  border: 1px solid var(--border); margin-bottom: 10px;
+  overflow: hidden;
+}
+.food-card-top {
+  padding: 14px 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.food-card-top h3 { font-size: 14px; font-weight: 600; }
+.food-card-top p { font-size: 12px; color: var(--soft); margin-top: 2px; }
+.food-card-top .food-arrow { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+.food-card-top .food-arrow.open { transform: rotate(90deg); }
+
+.food-detail {
+  border-top: 1px solid var(--border);
+  padding: 12px 16px; display: none;
+}
+.food-detail.open { display: block; }
+.food-detail .ingredient {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.food-detail .ingredient:last-child { border-bottom: none; }
+.food-detail .ingredient span:last-child { font-weight: 600; color: var(--soft); }
+.food-detail .prep {
+  margin-top: 10px; font-size: 12px; color: var(--soft);
+  line-height: 1.6; font-style: italic;
+}
+.food-macros {
+  display: flex; gap: 8px; margin-top: 10px;
+}
+.macro-pill {
+  flex: 1; background: var(--bg); border-radius: var(--rs);
+  padding: 8px; text-align: center; border: 1px solid var(--border);
+}
+.macro-pill .macro-val { font-size: 15px; font-weight: 700; }
+.macro-pill .macro-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ROADMAP TAB */
+.roadmap-list { padding: 16px; }
+.month-card {
+  background: var(--surface); border-radius: var(--r);
+  border: 1px solid var(--border); margin-bottom: 10px;
+  overflow: hidden;
+}
+.month-header {
+  padding: 14px 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.month-header-left { display: flex; align-items: center; gap: 12px; }
+.month-badge {
+  font-size: 11px; font-weight: 700; padding: 4px 10px;
+  border-radius: 99px; flex-shrink: 0;
+}
+.month-header h3 { font-size: 15px; font-weight: 600; }
+.month-header p { font-size: 12px; color: var(--soft); margin-top: 2px; }
+.month-arrow { color: var(--muted); font-size: 18px; transition: transform 0.2s; }
+.month-arrow.open { transform: rotate(90deg); }
+
+.month-body {
+  border-top: 1px solid var(--border);
+  padding: 14px 16px; display: none;
+}
+.month-body.open { display: block; }
+
+.month-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.month-row:last-child { border-bottom: none; }
+.month-row .row-label { color: var(--soft); width: 80px; flex-shrink: 0; padding-top: 1px; }
+.month-row .row-val { font-weight: 500; line-height: 1.5; }
+
+.current-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; color: white;
+  background: var(--text); padding: 3px 9px; border-radius: 99px; margin-left: 8px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed; top: 20px; left: 50%;
+  transform: translateX(-50%) translateY(-70px);
+  background: var(--text); color: white;
+  padding: 11px 22px; border-radius: 99px;
+  font-size: 13px; font-weight: 600;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  z-index: 200; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* PROGRESS STRIP */
+.progress-strip {
+  padding: 12px 16px 0;
+  display: flex; gap: 10px;
+}
+.stat-box {
+  flex: 1; background: var(--surface); border-radius: var(--r);
+  border: 1px solid var(--border); padding: 12px;
+  text-align: center;
+}
+.stat-box .stat-num { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.stat-box .stat-label { font-size: 11px; color: var(--soft); margin-top: 3px; }
+
+.countdown-box {
+  background: var(--text); color: white;
+  border-radius: var(--r); padding: 14px 16px;
+  margin: 12px 16px 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.countdown-box .left p { font-size: 12px; opacity: 0.6; }
+.countdown-box .left h3 { font-size: 15px; font-weight: 600; margin-top: 2px; }
+.countdown-box .right { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+.countdown-box .right span { font-size: 13px; font-weight: 400; opacity: 0.6; }
+
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">✓ Guardado</div>
+
+<!-- ============ TAB: ENTRENAR ============ -->
+<div class="tab active" id="tab-train">
+  <div class="page-header">
+    <h1>Entrenar</h1>
+    <p id="train-date"></p>
+  </div>
+
+  <div id="workout-grid-wrap" class="workout-grid-wrap">
+    <div id="countdown-train" class="countdown-box" style="margin-top:16px">
+      <div class="left"><p>Objetivo</p><h3>Media Maratón Madrid</h3></div>
+      <div class="right"><span id="days-num">—</span><span> días</span></div>
+    </div>
+    <div class="workout-grid" style="margin-top:4px">
+      <div class="workout-tile tile-glute" onclick="openWorkout('glute')">
+        <div class="tile-icon">🍑</div>
+        <div><div class="tile-name">Glúteo</div><div class="tile-sub">5 ejercicios</div></div>
+      </div>
+      <div class="workout-tile tile-leg" onclick="openWorkout('leg')">
+        <div class="tile-icon">🦵</div>
+        <div><div class="tile-name">Pierna completa</div><div class="tile-sub">5 ejercicios</div></div>
+      </div>
+      <div class="workout-tile tile-back" onclick="openWorkout('back')">
+        <div class="tile-icon">🔙</div>
+        <div><div class="tile-name">Espalda</div><div class="tile-sub">7 ejercicios</div></div>
+      </div>
+      <div class="workout-tile tile-shoulder" onclick="openWorkout('shoulder')">
+        <div class="tile-icon">💪</div>
+        <div><div class="tile-name">Hombro</div><div class="tile-sub">Hombro · Tríceps · Core</div></div>
+      </div>
+      <div class="workout-tile tile-run" onclick="openWorkout('run')">
+        <div class="tile-icon">🏃‍♀️</div>
+        <div><div class="tile-name">Carrera suave</div><div class="tile-sub">Z2 · con series opcional</div></div>
+      </div>
+      <div class="workout-tile tile-long" onclick="openWorkout('long')">
+        <div class="tile-icon">🛣️</div>
+        <div><div class="tile-name">Tirada larga</div><div class="tile-sub">Z2 estricto</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="workout-detail" id="workout-detail">
+    <div class="detail-header">
+      <div class="back-btn" onclick="closeWorkout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <h2 id="detail-title"></h2>
+    </div>
+    <div id="detail-body"></div>
+  </div>
+</div>
+
+<!-- ============ TAB: CALENDARIO ============ -->
+<div class="tab" id="tab-cal">
+  <div class="page-header">
+    <h1>Historial</h1>
+    <p>Tus sesiones registradas</p>
+  </div>
+
+  <div style="padding:16px 16px 0">
+    <div class="progress-strip" style="padding:0;margin-bottom:10px">
+      <div class="stat-box"><div class="stat-num" id="cal-total">0</div><div class="stat-label">sesiones</div></div>
+      <div class="stat-box"><div class="stat-num" id="cal-km">0</div><div class="stat-label">km corridos</div></div>
+      <div class="stat-box"><div class="stat-num" id="cal-streak">0</div><div class="stat-label">racha (sem)</div></div>
+    </div>
+
+    <div class="cal-nav">
+      <button onclick="calPrev()">←</button>
+      <h2 id="cal-month-label"></h2>
+      <button onclick="calNext()">→</button>
+    </div>
+  </div>
+
+  <div class="cal-days-header">
+    <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+
+  <div class="cal-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-glute-bg);border:2px solid var(--c-glute)"></div>Glúteo</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-leg-bg);border:2px solid var(--c-leg)"></div>Pierna</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-back-bg);border:2px solid var(--c-back)"></div>Espalda</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-shoulder-bg);border:2px solid var(--c-shoulder)"></div>Hombro</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-run-bg);border:2px solid var(--c-run)"></div>Carrera</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--c-long-bg);border:2px solid var(--c-long)"></div>Tirada</div>
+  </div>
+
+  <div class="recent-log">
+    <h3>Últimas sesiones</h3>
+    <div id="recent-entries"></div>
+  </div>
+</div>
+
+<!-- ============ TAB: COMIDAS ============ -->
+<div class="tab" id="tab-food">
+  <div class="page-header">
+    <h1>Comidas</h1>
+    <p>7 opciones por toma · PCOS friendly</p>
+  </div>
+  <div class="food-tabs">
+    <button class="food-tab-btn active" onclick="switchFood('desayuno',this)">Desayuno</button>
+    <button class="food-tab-btn" onclick="switchFood('media',this)">Media mañana</button>
+    <button class="food-tab-btn" onclick="switchFood('comida',this)">Comida</button>
+    <button class="food-tab-btn" onclick="switchFood('merienda',this)">Merienda</button>
+    <button class="food-tab-btn" onclick="switchFood('cena',this)">Cena</button>
+  </div>
+  <div class="food-list" id="food-list"></div>
+</div>
+
+<!-- ============ TAB: ROADMAP ============ -->
+<div class="tab" id="tab-road">
+  <div class="page-header">
+    <h1>Roadmap</h1>
+    <p>Plan hasta la media maratón · 4 abril 2027</p>
+  </div>
+  <div class="roadmap-list" id="roadmap-list"></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchTab('train',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Entrenar
+  </button>
+  <button class="nav-btn" onclick="switchTab('cal',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Historial
+  </button>
+  <button class="nav-btn" onclick="switchTab('food',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+    Comidas
+  </button>
+  <button class="nav-btn" onclick="switchTab('road',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Roadmap
+  </button>
+</nav>
+
+<script>
+// ===================== DATA =====================
+
+const WORKOUTS = {
+  glute: {
+    name: 'Glúteo dominante', color: 'var(--c-glute-bg)', textColor: 'var(--c-glute)',
+    exercises: [
+      { name: 'Hip Thrust', meta: '4 × 6-8 · tempo 3-1-X · explosivo arriba', sets: 4, warn: null, alt: 'Prensa pies altos 4×8 + pausa isométrica 5s arriba' },
+      { name: 'Zancada atrás', meta: '3 × 10/lado · tempo 3-1-1', sets: 3, warn: 'Rodilla delantera máx 80-85°', alt: 'Búlgara con mancuernas' },
+      { name: 'Puente unilateral con carga', meta: '3 × 10/lado · tempo 3-2-1', sets: 3, warn: null, alt: 'Step up a banco con mancuerna' },
+      { name: 'Patada glúteo en polea', meta: '3 × 12/lado · tempo 2-1-2', sets: 3, warn: null, alt: 'Cuadrupedia con tobillera lastrada' },
+      { name: 'Abductor máquina', meta: '3 × 20 · tempo 2-1-2 · pausa arriba', sets: 3, warn: null, alt: 'Abducción de cadera en polea baja de pie' },
+    ]
+  },
+  leg: {
+    name: 'Pierna completa', color: 'var(--c-leg-bg)', textColor: 'var(--c-leg)',
+    exercises: [
+      { name: 'Hack squat', meta: '4 × 10 · tempo 3-0-X', sets: 4, warn: 'Pies altos en plataforma siempre', alt: 'Prensa pies altos 4×10' },
+      { name: 'Búlgara', meta: '3 × 8/lado · tempo 3-1-2', sets: 3, warn: 'Rodilla sin sobrepasar punta del pie', alt: 'Zancada con mancuernas más ligera' },
+      { name: 'Prensa pies altos', meta: '3 × 10 · tempo 3-0-X', sets: 3, warn: null, alt: 'Goblet squat' },
+      { name: 'Curl femoral tumbado', meta: '3 × 12 · tempo 3-1-2', sets: 3, warn: 'Rango medio solo, L5-S1', alt: 'Fitball curl' },
+      { name: 'Extensiones cuádriceps', meta: '3 × 12 · tempo 2-1-2', sets: 3, warn: null, alt: null },
+    ]
+  },
+  back: {
+    name: 'Espalda + Core', color: 'var(--c-back-bg)', textColor: 'var(--c-back)',
+    exercises: [
+      { name: 'Dominadas', meta: '4 × máx · asistida si necesitas', sets: 4, warn: null, alt: 'Jalón al pecho en polea 4×8' },
+      { name: 'Jalón al pecho', meta: '3 × 10 · tempo 2-1-2 · agarre prono', sets: 3, warn: null, alt: 'Polea con banda de asistencia' },
+      { name: 'Remo en máquina', meta: '3 × 12 · tempo 2-1-2 · codo pegado', sets: 3, warn: 'L5-S1: remo apoyado si molesta', alt: 'Remo con mancuerna apoyada en banco' },
+      { name: 'Face pull en polea', meta: '3 × 15 · tempo 2-1-2 · codos arriba', sets: 3, warn: null, alt: 'Pájaros con mancuernas' },
+      { name: 'Pull through en polea', meta: '3 × 12 · tempo 3-1-2 · bisagra de cadera', sets: 3, warn: 'L5-S1: no redondear la espalda nunca', alt: null },
+      { name: 'Hollow hold', meta: '3 × 20-25s · isométrico · lumbar pegada', sets: 3, warn: 'L5-S1: reduce a 15s si molesta', alt: 'Dead bug 3×10/lado' },
+      { name: 'Dead bug', meta: '3 × 10/lado · muy controlado', sets: 3, warn: null, alt: null },
+    ]
+  },
+  shoulder: {
+    name: 'Hombro · Tríceps · Core', color: 'var(--c-shoulder-bg)', textColor: 'var(--c-shoulder)',
+    exercises: [
+      { name: 'Press militar con mancuernas', meta: '4 × 10 · tempo 2-1-2', sets: 4, warn: null, alt: 'Press en máquina Hammer' },
+      { name: 'Elevaciones laterales', meta: '3 × 15 · tempo 2-1-2 · peso ligero', sets: 3, warn: null, alt: 'Cable lateral unilateral' },
+      { name: 'Pájaros / Rear delt fly', meta: '3 × 15 · tempo 2-1-2', sets: 3, warn: null, alt: 'Face pull en polea' },
+      { name: 'Press inclinado / Pecho', meta: '3 × 10 · tempo 3-1-2', sets: 3, warn: null, alt: 'Flexiones en banco inclinado' },
+      { name: 'Tríceps en polea', meta: '3 × 15 · tempo 2-1-2 · codo fijo', sets: 3, warn: null, alt: 'Press francés con mancuerna' },
+      { name: 'Plancha', meta: '3 × 30-45s · cuerpo alineado', sets: 3, warn: 'L5-S1: reduce tiempo si molesta', alt: 'Plancha sobre rodillas' },
+      { name: 'Rotaciones rusas', meta: '3 × 20 · con peso ligero', sets: 3, warn: null, alt: 'Crunch bicicleta' },
+      { name: 'Pallof press', meta: '3 × 12/lado · antirotación', sets: 3, warn: null, alt: 'Plancha lateral 20s/lado' },
+    ]
+  },
+  run: {
+    name: 'Carrera suave', color: 'var(--c-run-bg)', textColor: 'var(--c-run)',
+    isRun: true,
+    fields: [
+      { id: 'km', label: 'Km totales', placeholder: '6.0' },
+      { id: 'pace', label: 'Ritmo medio', placeholder: '6:10 /km' },
+      { id: 'zone', label: 'Zona FC', placeholder: 'Z2' },
+      { id: 'series', label: 'Series (opcional)', placeholder: 'ej: 4×400m a 5:20' },
+      { id: 'feel', label: 'Sensaciones', placeholder: 'piernas bien, respiración ok...' },
+    ]
+  },
+  long: {
+    name: 'Tirada larga', color: 'var(--c-long-bg)', textColor: 'var(--c-long)',
+    isRun: true,
+    fields: [
+      { id: 'km', label: 'Km totales', placeholder: '10.0' },
+      { id: 'pace', label: 'Ritmo medio', placeholder: '6:15 /km' },
+      { id: 'zone', label: 'Zona FC', placeholder: 'Z2 estricto' },
+      { id: 'time', label: 'Tiempo total', placeholder: '1h 02min' },
+      { id: 'feel', label: 'Sensaciones', placeholder: 'cómo fueron las piernas...' },
+    ]
+  }
+};
+
+const WORKOUT_COLORS = {
+  glute: '#c2956b', leg: '#6baa6b', back: '#6b8fc2',
+  shoulder: '#b46bb4', run: '#888', long: '#c2a86b'
+};
+const WORKOUT_BG = {
+  glute: 'var(--c-glute-bg)', leg: 'var(--c-leg-bg)', back: 'var(--c-back-bg)',
+  shoulder: 'var(--c-shoulder-bg)', run: 'var(--c-run-bg)', long: 'var(--c-long-bg)'
+};
+const WORKOUT_NAMES = {
+  glute: 'Glúteo', leg: 'Pierna', back: 'Espalda',
+  shoulder: 'Hombro', run: 'Carrera', long: 'Tirada larga'
+};
+
+const FOOD = {
+  desayuno: [
+    { name: 'Tostada con huevo revuelto', sub: '~420 kcal · 28g proteína',
+      ingredients: [['Pan masa madre','60g'],['Huevos','2 unidades (100g)'],['Aceite de oliva virgen','10ml'],['Tomate rallado','50g'],['Jamón serrano','30g']],
+      macros: { p:'28g', c:'42g', g:'16g' },
+      prep: 'Tostar el pan. Revolver los huevos a fuego bajo con el aceite. Untar tomate rallado y añadir el jamón encima.' },
+    { name: 'Tostada con jamón y tomate', sub: '~350 kcal · 24g proteína',
+      ingredients: [['Pan masa madre','60g'],['Jamón serrano','60g'],['Tomate natural','100g'],['Aceite de oliva','10ml'],['Sal y orégano','al gusto']],
+      macros: { p:'24g', c:'38g', g:'12g' },
+      prep: 'Tostar el pan, frotar el tomate natural directamente sobre la tostada, añadir jamón y un hilo de aceite.' },
+    { name: 'Tostada con ricotta y lomo', sub: '~380 kcal · 26g proteína',
+      ingredients: [['Pan masa madre','60g'],['Ricotta','80g'],['Lomo embuchado','50g'],['Aceite de oliva','5ml'],['Pimienta negra','al gusto']],
+      macros: { p:'26g', c:'38g', g:'14g' },
+      prep: 'Untar ricotta generosamente sobre la tostada, disponer el lomo en lonchas y añadir un toque de pimienta.' },
+    { name: 'Tortitas de arroz con pavo', sub: '~290 kcal · 22g proteína',
+      ingredients: [['Tortitas de arroz','4 unidades (40g)'],['Pavo en lonchas','80g'],['Queso fresco','60g'],['Tomate cherry','100g']],
+      macros: { p:'22g', c:'30g', g:'8g' },
+      prep: 'Montar las tortitas con queso fresco, pavo y tomate cherry partido. Rápido y saciante.' },
+    { name: 'Huevos a la plancha con aguacate', sub: '~420 kcal · 24g proteína',
+      ingredients: [['Huevos','2 unidades'],['Aguacate','80g (½ pieza)'],['Pan de semillas','40g'],['Aceite de oliva','10ml'],['Sal, limón','al gusto']],
+      macros: { p:'24g', c:'28g', g:'22g' },
+      prep: 'Hacer los huevos a la plancha con el aceite. Triturar el aguacate con unas gotas de limón y sal.' },
+    { name: 'Kéfir con fruta y tostada', sub: '~360 kcal · 18g proteína',
+      ingredients: [['Kéfir natural','200ml'],['Fruta de temporada','150g'],['Pan masa madre','50g'],['Aceite de oliva','8ml'],['Nueces','15g']],
+      macros: { p:'18g', c:'44g', g:'12g' },
+      prep: 'Tomar el kéfir con la fruta troceada. Tostada con aceite aparte. Buen aporte de probióticos.' },
+    { name: 'Tortilla francesa', sub: '~380 kcal · 26g proteína',
+      ingredients: [['Huevos','3 unidades'],['Pan de cristal','50g'],['Aceite de oliva','10ml'],['Sal','al gusto'],['Tomate cherry','100g']],
+      macros: { p:'26g', c:'32g', g:'18g' },
+      prep: 'Batir los 3 huevos con sal. Cuajar en sartén antiadherente con aceite a fuego medio. Acompañar con el pan y los cherry.' },
+  ],
+  media: [
+    { name: 'Fruta con nueces', sub: '~200 kcal · 4g proteína',
+      ingredients: [['Fruta de temporada','200g'],['Nueces','20g']],
+      macros: { p:'4g', c:'28g', g:'10g' },
+      prep: 'La fruta que haya en temporada. Las nueces sacian y aportan omega-3.' },
+    { name: 'Yogur proteico natural', sub: '~150 kcal · 18g proteína',
+      ingredients: [['Yogur griego 0%','200g'],['Canela','al gusto']],
+      macros: { p:'18g', c:'8g', g:'0g' },
+      prep: 'Solo, con canela o con una cucharadita de miel si entrenas ese día.' },
+    { name: 'Tortitas de maíz con pavo', sub: '~180 kcal · 16g proteína',
+      ingredients: [['Tortitas de maíz','3 unidades (30g)'],['Pavo en lonchas','60g'],['Queso fresco','30g']],
+      macros: { p:'16g', c:'22g', g:'4g' },
+      prep: 'Montarlo todo junto. Rápido para llevar a la oficina.' },
+    { name: 'Kéfir solo', sub: '~120 kcal · 8g proteína',
+      ingredients: [['Kéfir natural','200ml']],
+      macros: { p:'8g', c:'10g', g:'4g' },
+      prep: 'Solo. Ideal cuando no tienes hambre pero el cuerpo necesita probióticos.' },
+    { name: 'Fruta con queso fresco', sub: '~190 kcal · 10g proteína',
+      ingredients: [['Fruta de temporada','150g'],['Queso fresco','80g']],
+      macros: { p:'10g', c:'22g', g:'6g' },
+      prep: 'Combinación sencilla y saciante. El queso ralentiza la absorción del azúcar de la fruta.' },
+    { name: 'Edamame', sub: '~150 kcal · 12g proteína',
+      ingredients: [['Edamame congelado','150g'],['Sal marina','al gusto']],
+      macros: { p:'12g', c:'10g', g:'5g' },
+      prep: 'Cocer 5 min en agua con sal. Escurrir y listo. Gran opción para el SOP por sus fitoestrógenos.' },
+    { name: 'Tostada con bonito', sub: '~220 kcal · 20g proteína',
+      ingredients: [['Pan masa madre','40g'],['Bonito del norte en aceite','60g'],['Tomate natural','50g']],
+      macros: { p:'20g', c:'24g', g:'7g' },
+      prep: 'Escurrir el bonito. Tostar el pan, añadir tomate y el bonito encima.' },
+  ],
+  comida: [
+    { name: 'Arroz con pollo y verduras', sub: '~520 kcal · 42g proteína',
+      ingredients: [['Arroz blanco cocido','150g'],['Pechuga de pollo','180g'],['Pimiento y calabacín','150g'],['Aceite de oliva','15ml'],['Especias al gusto','—']],
+      macros: { p:'42g', c:'55g', g:'12g' },
+      prep: 'Marcar el pollo en sartén con aceite. Saltear las verduras. Servir sobre el arroz. Proteína alta para recuperación post-entrenamiento.' },
+    { name: 'Lentejas con verduras y huevo', sub: '~480 kcal · 34g proteína',
+      ingredients: [['Lentejas cocidas','200g'],['Zanahoria y apio','100g'],['Huevo duro','1 unidad (60g)'],['Aceite de oliva','10ml'],['Cúrcuma y comino','al gusto']],
+      macros: { p:'34g', c:'52g', g:'10g' },
+      prep: 'Calentar las lentejas con las verduras. Cocer el huevo aparte 10 min. La cúrcuma es antiinflamatoria, ideal para el SOP.' },
+    { name: 'Espaguetis con carne picada', sub: '~560 kcal · 38g proteína',
+      ingredients: [['Espaguetis','80g secos'],['Carne picada de ternera','150g'],['Tomate natural triturado','150g'],['Aceite de oliva','10ml'],['Ajo y cebolla','50g']],
+      macros: { p:'38g', c:'62g', g:'14g' },
+      prep: 'Sofreír ajo y cebolla, añadir la carne, cocinar bien. Añadir el tomate y dejar 15 min a fuego lento. Mezclar con la pasta al dente.' },
+    { name: 'Garbanzos con espinacas y pechuga', sub: '~490 kcal · 44g proteína',
+      ingredients: [['Garbanzos cocidos','150g'],['Espinacas frescas','100g'],['Pechuga a la plancha','160g'],['Aceite de oliva','10ml'],['Pimentón ahumado','al gusto']],
+      macros: { p:'44g', c:'42g', g:'12g' },
+      prep: 'Saltear las espinacas con ajo y aceite. Añadir los garbanzos. Hacer la pechuga a la plancha aparte y servir junto.' },
+    { name: 'Ensalada de pasta con atún', sub: '~450 kcal · 36g proteína',
+      ingredients: [['Pasta integral cocida','120g'],['Atún en agua','120g'],['Huevo duro','1 unidad'],['Tomate cherry','100g'],['Aceite de oliva','10ml']],
+      macros: { p:'36g', c:'50g', g:'11g' },
+      prep: 'Cocer la pasta, enfriar. Mezclar todos los ingredientes. Aliñar con aceite, sal y vinagre. Fácil para llevar al trabajo.' },
+    { name: 'Arroz con guisantes y lomo', sub: '~500 kcal · 40g proteína',
+      ingredients: [['Arroz cocido','150g'],['Guisantes','80g'],['Lomo de cerdo','160g'],['Aceite de oliva','10ml'],['Ajo y perejil','al gusto']],
+      macros: { p:'40g', c:'52g', g:'12g' },
+      prep: 'Hacer el lomo a la plancha sazonado con ajo. Mezclar el arroz con los guisantes calentados. Los guisantes son de tus favoritos.' },
+    { name: 'Hamburguesa con patata al horno', sub: '~580 kcal · 44g proteína',
+      ingredients: [['Hamburguesa de ternera 100%','180g'],['Patata','200g'],['Ensalada verde','80g'],['Aceite de oliva','15ml'],['Sal y especias','al gusto']],
+      macros: { p:'44g', c:'48g', g:'18g' },
+      prep: 'Hornear la patata troceada a 200° con aceite 30 min. Hacer la hamburguesa a la plancha. Ensalada verde de acompañamiento.' },
+  ],
+  merienda: [
+    { name: 'Tortitas con chocolate negro', sub: '~180 kcal · 3g proteína',
+      ingredients: [['Tortitas de maíz','3 unidades'],['Chocolate negro 85%','20g']],
+      macros: { p:'3g', c:'28g', g:'7g' },
+      prep: 'El chocolate negro es antiinflamatorio. Buena opción en fase lútea para el antojo dulce.' },
+    { name: 'Yogur proteico con fruta', sub: '~200 kcal · 20g proteína',
+      ingredients: [['Yogur griego 0%','200g'],['Fruta de temporada','100g'],['Canela','al gusto']],
+      macros: { p:'20g', c:'18g', g:'0g' },
+      prep: 'Mezclar. Añadir canela que regula el azúcar en sangre, ideal para el SOP.' },
+    { name: 'Plátano con almendras', sub: '~220 kcal · 6g proteína',
+      ingredients: [['Plátano','1 mediano (120g)'],['Almendras','20g']],
+      macros: { p:'6g', c:'32g', g:'10g' },
+      prep: 'Ideal antes de entrenar por la tarde. El plátano da energía rápida y las almendras grasas sostenidas.' },
+    { name: 'Kéfir con tostada', sub: '~230 kcal · 12g proteína',
+      ingredients: [['Kéfir natural','200ml'],['Pan masa madre','40g'],['Aceite de oliva','5ml']],
+      macros: { p:'12g', c:'28g', g:'7g' },
+      prep: 'Beber el kéfir y tostar el pan con el aceite. Saciante sin ser pesado.' },
+    { name: 'Pavo con queso fresco', sub: '~190 kcal · 24g proteína',
+      ingredients: [['Pavo en lonchas','80g'],['Queso fresco','80g'],['Pepino','100g']],
+      macros: { p:'24g', c:'4g', g:'7g' },
+      prep: 'La merienda más proteica de las 7. Perfecta después de entrenar.' },
+    { name: 'Fruta de temporada', sub: '~100 kcal · 1g proteína',
+      ingredients: [['Fruta de temporada','200g']],
+      macros: { p:'1g', c:'24g', g:'0g' },
+      prep: 'Cuando no tienes mucha hambre pero necesitas algo. Elige la de temporada.' },
+    { name: 'Batido de proteína', sub: '~200 kcal · 25g proteína',
+      ingredients: [['Proteína de suero (whey)','30g'],['Leche semidesnatada o agua','250ml'],['Plátano (opcional)','60g']],
+      macros: { p:'25g', c:'18g', g:'3g' },
+      prep: 'Mezclar en shaker o batidora. Ideal post-entreno si no puedes comer enseguida.' },
+  ],
+  cena: [
+    { name: 'Pollo con habas y AOVE', sub: '~440 kcal · 42g proteína',
+      ingredients: [['Pechuga de pollo','180g'],['Habas o guisantes','120g'],['Aceite de oliva virgen','15ml'],['Ajo y limón','al gusto'],['Sal y pimienta','al gusto']],
+      macros: { p:'42g', c:'20g', g:'15g' },
+      prep: 'Hacer el pollo a la plancha sazonado con ajo y limón. Calentar las habas con un chorrito de aceite.' },
+    { name: 'Salmón al horno con verdura', sub: '~460 kcal · 40g proteína',
+      ingredients: [['Salmón fresco','200g'],['Brócoli o judías verdes','200g'],['Aceite de oliva','10ml'],['Limón','½ pieza'],['Eneldo o especias','al gusto']],
+      macros: { p:'40g', c:'12g', g:'22g' },
+      prep: 'Hornear el salmón a 180° 15 min con limón y eneldo. Hervir o vapear la verdura. El salmón es clave para el SOP por su omega-3.' },
+    { name: 'Tortilla de 3 huevos con ensalada', sub: '~380 kcal · 26g proteína',
+      ingredients: [['Huevos','3 unidades'],['Ensalada verde variada','100g'],['Tomate cherry','80g'],['Aceite de oliva','12ml'],['Vinagre y sal','al gusto']],
+      macros: { p:'26g', c:'8g', g:'24g' },
+      prep: 'Batir los huevos y cuajar en sartén. La tortilla que más sale en España por algo es.' },
+    { name: 'Lomo con arroz integral', sub: '~490 kcal · 42g proteína',
+      ingredients: [['Lomo de cerdo','180g'],['Arroz integral cocido','120g'],['Tomate natural','100g'],['Aceite de oliva','10ml'],['Ajo y romero','al gusto']],
+      macros: { p:'42g', c:'42g', g:'12g' },
+      prep: 'Marinar el lomo con ajo y romero. Hacer a la plancha. El arroz integral tiene más fibra que el blanco, mejor para el SOP.' },
+    { name: 'Merluza al horno con patata', sub: '~420 kcal · 38g proteína',
+      ingredients: [['Merluza','200g'],['Patata cocida','150g'],['Pimientos asados','100g'],['Aceite de oliva','10ml'],['Ajo y perejil','al gusto']],
+      macros: { p:'38g', c:'30g', g:'10g' },
+      prep: 'Hornear la merluza a 180° 12 min con ajo y perejil. Cocer la patata aparte.' },
+    { name: 'Revuelto de huevo con gambas', sub: '~380 kcal · 34g proteína',
+      ingredients: [['Huevos','3 unidades'],['Gambas peladas','120g'],['Espárragos trigueros','100g'],['Aceite de oliva','12ml'],['Ajo y sal','al gusto']],
+      macros: { p:'34g', c:'6g', g:'22g' },
+      prep: 'Saltear las gambas con ajo, añadir los espárragos. Añadir los huevos batidos y remover a fuego bajo.' },
+    { name: 'Pavo con lentejas en ensalada fría', sub: '~400 kcal · 40g proteína',
+      ingredients: [['Pechuga de pavo','160g'],['Lentejas cocidas','120g'],['Pepino y tomate','150g'],['Aceite de oliva','10ml'],['Limón y mostaza','al gusto']],
+      macros: { p:'40g', c:'28g', g:'10g' },
+      prep: 'Hacer el pavo a la plancha. Mezclar las lentejas con las verduras. Aliñar con aceite, limón y mostaza. Fresquito y rico.' },
+  ]
+};
+
+const ROADMAP = [
+  { month: 'Sep 2026', phase: 'Base y estructura', current: true,
+    running: '6 km suaves (L·J) + tirada larga 9-10 km (S)',
+    strength: '2× pierna (D·J) · Espalda (M) · Hombro (X)',
+    series: 'Sin series aún · consolidar rutina primero',
+    key: 'Establecer la estructura semanal y mantenerla. Rodilla y espalda estables.' },
+  { month: 'Oct 2026', phase: 'Construcción aeróbica',
+    running: '6-7 km (L·J) + tirada 11-13 km (S)',
+    strength: '2× pierna · Espalda · Hombro · subir cargas',
+    series: '4×400m los jueves · Z3 controlado',
+    key: 'Primera tirada de 12 km. Introducir series suaves. Subir cargas en Hip Thrust.' },
+  { month: 'Nov 2026', phase: 'Volumen y fuerza',
+    running: '7 km (L·J) + tirada 14-16 km (S)',
+    strength: '2× pierna · cargas altas · RDL si espalda responde',
+    series: '5×400m o 3×800m · aumentar intensidad',
+    key: 'Tirada de 16 km. Máximos de fuerza antes del bloque running. Pull through consolidado.' },
+  { month: 'Dic 2026', phase: 'Intensidad específica',
+    running: '7-8 km (L·J) + tirada 16-18 km (S)',
+    strength: '1× pierna ligera · mantener glúteo',
+    series: 'Series largas 4×800m · ritmo objetivo media',
+    key: 'Tirada de 18 km. Reducir fuerza para dar prioridad al running.' },
+  { month: 'Ene 2027', phase: 'Pico de carga',
+    running: '7-8 km (L·J) + tirada 18-19 km (S)',
+    strength: '1× pierna muy suave · solo core',
+    series: 'Series a ritmo real de carrera',
+    key: 'Tirada más larga: 18-19 km. Semana de descarga al final del mes.' },
+  { month: 'Feb 2027', phase: 'Descarga y ajuste',
+    running: '6 km (L·J) + tirada 12-14 km (S)',
+    strength: '1× pierna moderada · core',
+    series: 'Mantener ritmo · bajar volumen',
+    key: 'Semana de descarga completa. Revisar rodilla y espalda con fisio.' },
+  { month: 'Mar 2027', phase: 'Tapering',
+    running: '5 km (L·J) + tirada 10-12 km (S)',
+    strength: 'Sin fuerza · solo movilidad y core suave',
+    series: 'Activaciones breves · sin esfuerzo',
+    key: 'Reducir volumen -60%. Llegar al 4 de abril descansada y confiada.' },
+  { month: '4 Abr 2027 🎉', phase: 'MEDIA MARATÓN MADRID',
+    running: '21.097 km · con tu amiga 💕',
+    strength: '—', series: '—',
+    key: 'Disfrutarla. Llegar sana a la línea de salida. Cruzar la meta.' },
+];
+
+// ===================== STATE =====================
+let logs = JSON.parse(localStorage.getItem('elena_v2_logs') || '{}');
+let currentWorkout = null;
+let calMonth = new Date();
+let currentFoodSection = 'desayuno';
+
+// ===================== UTILS =====================
+function dateKey(d) { return d.toISOString().split('T')[0]; }
+function today() { return dateKey(new Date()); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg || '✓ Guardado';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ===================== TRAIN =====================
+function openWorkout(type) {
+  currentWorkout = type;
+  const w = WORKOUTS[type];
+  document.getElementById('detail-title').textContent = w.name;
+  document.getElementById('workout-grid-wrap').classList.add('hidden');
+  document.getElementById('workout-detail').classList.add('open');
+
+  const key = today();
+  const log = (logs[key] && logs[key][type]) || {};
+
+  let body = '';
+  if (w.isRun) {
+    body += `<div style="padding:12px 16px 0">`;
+    body += `<div class="run-card">`;
+    w.fields.forEach(f => {
+      body += `<div class="run-field"><label>${f.label}</label><input type="text" id="rf-${f.id}" placeholder="${f.placeholder}" value="${log[f.id]||''}" /></div>`;
+    });
+    body += `</div>`;
+    body += `<div class="notes-wrap" style="margin-top:10px"><textarea id="run-notes" placeholder="Notas...">${log.notes||''}</textarea></div>`;
+    body += `</div>`;
+  } else {
+    body += `<div class="ex-list">`;
+    (w.exercises||[]).forEach((ex, idx) => {
+      const exLog = (log.exercises||{})[idx] || {};
+      const isDone = !!exLog.done;
+      let setsHtml = '';
+      for (let s = 1; s <= ex.sets; s++) {
+        const val = (exLog.weights||{})[s] || '';
+        setsHtml += `<div class="set-box"><label>S${s}</label><input type="number" placeholder="kg" value="${val}" onchange="saveSet('${key}','${type}',${idx},${s},this.value)" /></div>`;
+      }
+      body += `
+        <div class="ex-card">
+          <div class="ex-card-top" onclick="toggleEx('${key}','${type}',${idx})">
+            <div class="ex-card-top-left">
+              <div class="ex-name">${ex.name}</div>
+              <div class="ex-meta">${ex.meta}</div>
+              ${ex.warn ? `<div class="ex-warn">⚠️ ${ex.warn}</div>` : ''}
+            </div>
+            <div class="ex-check ${isDone?'done':''}" id="excheck-${idx}">
+              ${isDone?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
+            </div>
+          </div>
+          <div class="ex-log ${exLog.open?'open':''}" id="exlog-${idx}">
+            <div class="sets-row">${setsHtml}</div>
+          </div>
+          ${ex.alt ? `<div class="alt-box"><p>Si está ocupada</p><span>${ex.alt}</span></div>` : ''}
+        </div>`;
+    });
+    body += `</div>`;
+    body += `<div class="notes-wrap"><textarea id="strength-notes" placeholder="Notas de la sesión...">${log.notes||''}</textarea></div>`;
+  }
+  body += `<button class="save-btn" onclick="saveWorkout('${key}','${type}')">Guardar sesión</button>`;
+  document.getElementById('detail-body').innerHTML = body;
+}
+
+function closeWorkout() {
+  currentWorkout = null;
+  document.getElementById('workout-grid-wrap').classList.remove('hidden');
+  document.getElementById('workout-detail').classList.remove('open');
+}
+
+function toggleEx(key, type, idx) {
+  if (!logs[key]) logs[key] = {};
+  if (!logs[key][type]) logs[key][type] = {};
+  if (!logs[key][type].exercises) logs[key][type].exercises = {};
+  if (!logs[key][type].exercises[idx]) logs[key][type].exercises[idx] = {};
+  const ex = logs[key][type].exercises[idx];
+  ex.open = !ex.open;
+  ex.done = ex.open;
+  localStorage.setItem('elena_v2_logs', JSON.stringify(logs));
+  const logEl = document.getElementById(`exlog-${idx}`);
+  const checkEl = document.getElementById(`excheck-${idx}`);
+  if (logEl) logEl.classList.toggle('open', ex.open);
+  if (checkEl) {
+    checkEl.classList.toggle('done', ex.done);
+    checkEl.innerHTML = ex.done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+  }
+}
+
+function saveSet(key, type, exIdx, setIdx, value) {
+  if (!logs[key]) logs[key] = {};
+  if (!logs[key][type]) logs[key][type] = {};
+  if (!logs[key][type].exercises) logs[key][type].exercises = {};
+  if (!logs[key][type].exercises[exIdx]) logs[key][type].exercises[exIdx] = {};
+  if (!logs[key][type].exercises[exIdx].weights) logs[key][type].exercises[exIdx].weights = {};
+  logs[key][type].exercises[exIdx].weights[setIdx] = value;
+  localStorage.setItem('elena_v2_logs', JSON.stringify(logs));
+}
+
+function saveWorkout(key, type) {
+  if (!logs[key]) logs[key] = {};
+  if (!logs[key][type]) logs[key][type] = {};
+  logs[key][type].done = true;
+  logs[key][type].type = type;
+  const w = WORKOUTS[type];
+  if (w.isRun) {
+    w.fields.forEach(f => {
+      const el = document.getElementById(`rf-${f.id}`);
+      if (el) logs[key][type][f.id] = el.value;
+    });
+    const notesEl = document.getElementById('run-notes');
+    if (notesEl) logs[key][type].notes = notesEl.value;
+  } else {
+    const notesEl = document.getElementById('strength-notes');
+    if (notesEl) logs[key][type].notes = notesEl.value;
+  }
+  localStorage.setItem('elena_v2_logs', JSON.stringify(logs));
+  showToast('✓ Sesión guardada');
+  closeWorkout();
+  renderCal();
+}
+
+// ===================== CALENDAR =====================
+function calPrev() { calMonth.setMonth(calMonth.getMonth()-1); renderCal(); }
+function calNext() { calMonth.setMonth(calMonth.getMonth()+1); renderCal(); }
+
+function renderCal() {
+  const m = calMonth.getMonth();
+  const y = calMonth.getFullYear();
+  const label = calMonth.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  document.getElementById('cal-month-label').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < startOffset; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    el.textContent = '.';
+    grid.appendChild(el);
+  }
+
+  const todayStr = today();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(y, m, d);
+    const key = dateKey(date);
+    const dayLogs = logs[key];
+    const isToday = key === todayStr;
+
+    const el = document.createElement('div');
+    el.className = `cal-day${isToday ? ' today' : ''}`;
+    el.textContent = d;
+
+    if (dayLogs) {
+      const types = Object.keys(dayLogs).filter(t => dayLogs[t].done);
+      if (types.length) {
+        el.classList.add('has-workout');
+        const dot = document.createElement('div');
+        dot.className = 'workout-dot';
+        dot.style.background = WORKOUT_COLORS[types[0]] || '#888';
+        el.appendChild(dot);
+      }
+    }
+    grid.appendChild(el);
+  }
+
+  // Stats
+  let totalSessions = 0, totalKm = 0;
+  Object.values(logs).forEach(dayLog => {
+    Object.entries(dayLog).forEach(([type, data]) => {
+      if (data.done) {
+        totalSessions++;
+        if ((type === 'run' || type === 'long') && data.km) {
+          totalKm += parseFloat(data.km) || 0;
+        }
+      }
+    });
+  });
+  document.getElementById('cal-total').textContent = totalSessions;
+  document.getElementById('cal-km').textContent = totalKm.toFixed(1);
+
+  // Recent
+  const recent = [];
+  Object.entries(logs).forEach(([key, dayLog]) => {
+    Object.entries(dayLog).forEach(([type, data]) => {
+      if (data.done) recent.push({ key, type, data });
+    });
+  });
+  recent.sort((a,b) => b.key.localeCompare(a.key));
+
+  const recentEl = document.getElementById('recent-entries');
+  if (recent.length === 0) {
+    recentEl.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aún no hay sesiones registradas</p>';
+    return;
+  }
+  recentEl.innerHTML = recent.slice(0,8).map(r => {
+    const date = new Date(r.key);
+    const dateStr = date.toLocaleDateString('es-ES', { weekday:'short', day:'numeric', month:'short' });
+    const extra = (r.type === 'run' || r.type === 'long') && r.data.km ? `${r.data.km} km · ${r.data.pace||''}` : '';
+    return `<div class="log-entry">
+      <div class="log-dot" style="background:${WORKOUT_COLORS[r.type]||'#888'}"></div>
+      <div class="log-info">
+        <div class="log-name">${WORKOUT_NAMES[r.type]||r.type}</div>
+        <div class="log-date">${dateStr}${extra ? ' · ' + extra : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== FOOD =====================
+function switchFood(section, btn) {
+  currentFoodSection = section;
+  document.querySelectorAll('.food-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFood();
+}
+
+function renderFood() {
+  const items = FOOD[currentFoodSection] || [];
+  const list = document.getElementById('food-list');
+  list.innerHTML = items.map((item, idx) => `
+    <div class="food-card">
+      <div class="food-card-top" onclick="toggleFood(${idx})">
+        <div>
+          <h3>${item.name}</h3>
+          <p>${item.sub}</p>
+        </div>
+        <div class="food-arrow" id="farrow-${idx}">›</div>
+      </div>
+      <div class="food-detail" id="fdetail-${idx}">
+        ${item.ingredients.map(([name,amount]) => `<div class="ingredient"><span>${name}</span><span>${amount}</span></div>`).join('')}
+        <div class="food-macros">
+          <div class="macro-pill"><div class="macro-val">${item.macros.p}</div><div class="macro-label">Proteína</div></div>
+          <div class="macro-pill"><div class="macro-val">${item.macros.c}</div><div class="macro-label">Carbos</div></div>
+          <div class="macro-pill"><div class="macro-val">${item.macros.g}</div><div class="macro-label">Grasas</div></div>
+        </div>
+        <div class="prep">${item.prep}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleFood(idx) {
+  const detail = document.getElementById(`fdetail-${idx}`);
+  const arrow = document.getElementById(`farrow-${idx}`);
+  const isOpen = detail.classList.contains('open');
+  document.querySelectorAll('.food-detail').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.food-arrow').forEach(a => a.classList.remove('open'));
+  if (!isOpen) { detail.classList.add('open'); arrow.classList.add('open'); }
+}
+
+// ===================== ROADMAP =====================
+function renderRoadmap() {
+  const list = document.getElementById('roadmap-list');
+  list.innerHTML = ROADMAP.map((m, idx) => {
+    const isLast = idx === ROADMAP.length - 1;
+    const bg = isLast ? 'var(--text)' : 'var(--bg)';
+    const color = isLast ? 'white' : 'var(--soft)';
+    return `
+    <div class="month-card">
+      <div class="month-header" onclick="toggleMonth(${idx})">
+        <div class="month-header-left">
+          <span class="month-badge" style="background:${bg};color:${color}">${m.month}</span>
+          <div>
+            <h3>${m.phase}${m.current ? '<span class="current-badge">Ahora</span>' : ''}</h3>
+          </div>
+        </div>
+        <div class="month-arrow" id="marrow-${idx}">›</div>
+      </div>
+      <div class="month-body ${m.current ? 'open' : ''}" id="mbody-${idx}">
+        <div class="month-row"><div class="row-label">Carrera</div><div class="row-val">${m.running}</div></div>
+        <div class="month-row"><div class="row-label">Fuerza</div><div class="row-val">${m.strength}</div></div>
+        <div class="month-row"><div class="row-label">Series</div><div class="row-val">${m.series}</div></div>
+        <div class="month-row"><div class="row-label">Objetivo</div><div class="row-val">${m.key}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // open arrows for current
+  ROADMAP.forEach((m,idx) => { if (m.current) { const a = document.getElementById(`marrow-${idx}`); if(a) a.classList.add('open'); } });
+}
+
+function toggleMonth(idx) {
+  const body = document.getElementById(`mbody-${idx}`);
+  const arrow = document.getElementById(`marrow-${idx}`);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+}
+
+// ===================== TABS =====================
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  el.classList.add('active');
+  if (tab === 'cal') renderCal();
+}
+
+// ===================== INIT =====================
+function init() {
+  const now = new Date();
+  document.getElementById('train-date').textContent = now.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
+
+  const race = new Date('2027-04-04');
+  const days = Math.ceil((race - now) / 86400000);
+  document.getElementById('days-num').textContent = days;
+
+  renderFood();
+  renderRoadmap();
+  renderCal();
+}
+
+init();
+</script>
+</body>
+</html>
